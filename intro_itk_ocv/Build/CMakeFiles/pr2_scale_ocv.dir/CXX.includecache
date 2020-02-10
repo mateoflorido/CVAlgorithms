@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/02_scale_ocv.cxx
+stdio.h
+-
+opencv2/opencv.hpp
+-
+
