@@ -276,7 +276,6 @@ int main( int argc, char* argv[] )
   {
     writer->Update( );
   }
-  
   catch( itk::ExceptionObject& err )
   {
     std::cerr << "Error: " << err << std::endl;
@@ -295,7 +294,6 @@ int main( int argc, char* argv[] )
   {
     std::cerr << "Error: " << err << std::endl;
     return( 1 );
-
   } // yrt
 
   //Output Sizes for each color to expand
@@ -429,28 +427,35 @@ int main( int argc, char* argv[] )
   {
     std::cerr << "Error: " << err << std::endl;
     return( 1 );
-
   } // yrt
   
   //Find diferences
-  //Load Original image
-  TColorImage* imgO = reader->GetOutput( );
   TColorImage* diferences = reader->GetOutput( );
   //Compare Original and Rescaled Images
-  TIterator rgbOIt( imgO, imgO->GetLargestPossibleRegion( ) );
   TColorIterator difIt( diferences, diferences->GetLargestPossibleRegion( ) );
-  rgbIt.GoToBegin( );
-  rgbOIt.GoToBegin( );
-  for( ; !rgbOIt.IsAtEnd( ) && !rgbIt.IsAtEnd( ) && !difIt.IsAtEnd( ) ; ++rgbOIt, ++rgbIt , ++difIt)
+  difIt.GoToBegin( );
+  crIt.GoToBegin( );
+  cgIt.GoToBegin( );
+  cbIt.GoToBegin( );
+  cRIt.GoToBegin( );
+  cGIt.GoToBegin( );
+  cBIt.GoToBegin( );
+  for( ; !cbIt.IsAtEnd( ) && !cgIt.IsAtEnd( ) && !crIt.IsAtEnd( ) && !cBIt.IsAtEnd( ) && !cGIt.IsAtEnd( ) && !cRIt.IsAtEnd( ) && !difIt.IsAtEnd(); ++cbIt, ++cgIt, ++crIt, ++cBIt, ++cGIt, ++cRIt, ++difIt)
   {
     TRGBPixel value, pixel;
-    pixel = rgbOIt.Get( )-rgbIt.Get();
-    
+    value = crIt.Get()-cRIt.Get();
+    pixel.SetRed(value.GetRed());
 
-    difIt.Set( pixel );
+    value = cgIt.Get()-cGIt.Get();
+    pixel.SetGreen(value.GetGreen());
+
+    value = cbIt.Get()-cBIt.Get();
+    pixel.SetBlue(value.GetBlue());
+
+    difIt.Set(pixel);
 
   } // rof
-
+  
   //Write diferences
   writer->SetInput( diferences );
   writer->SetFileName( basename + "_diff.png" );
@@ -468,4 +473,4 @@ int main( int argc, char* argv[] )
   return( 0 );
 }
 
-// eof - 01_color_channels.cxx
+// eof - 03_image_process_itk.cxx
