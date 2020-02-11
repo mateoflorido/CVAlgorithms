@@ -17,7 +17,7 @@
 #include <itkIdentityTransform.h>
 #include <itkResampleImageFilter.h>
 
-#include <itkExpandImageFilter.h>
+
 
 
 // Image type: 2-dimensional 1-byte rgb
@@ -33,7 +33,7 @@ typedef itk::ImageRegionIteratorWithIndex< TColorImage > TColorIterator;
 typedef itk::ImageFileWriter< TColorImage > TWriter;
 typedef itk::IdentityTransform<double, 2> TransformType;
 typedef itk::ResampleImageFilter< TColorImage, TColorImage > ResampleImageFilterType;
-typedef itk::ExpandImageFilter< TColorImage, TColorImage > ExpandImageFilterType; 
+ 
 
 
 // -------------------------------------------------------------------------
@@ -68,7 +68,7 @@ int main( int argc, char* argv[] )
 
   } // yrt
   TColorImage* img = reader->GetOutput( );
-
+  
   // Create color channel images
   // red channel
   TColorImage::Pointer rImg = TColorImage::New( );
@@ -200,13 +200,12 @@ int main( int argc, char* argv[] )
   TColorImage::SizeType outputSizeR;
   TColorImage::SizeType outputSizeG;
   TColorImage::SizeType outputSizeB;
-  outputSizeR[ 0 ] = inputSize[ 0 ] * 0.75f ;
-  outputSizeR[ 1 ] = inputSize[ 1 ] * 0.75f ;
-  outputSizeG[ 0 ] = inputSize[ 0 ] * 0.5f ;
-  outputSizeG[ 1 ] = inputSize[ 1 ] * 0.5f ;
-  outputSizeB[ 0 ] = inputSize[ 0 ] * 0.25f ;
-  outputSizeB[ 1 ] = inputSize[ 1 ] * 0.25f ;
-  
+  outputSizeR[ 0 ] = inputSize[ 0 ] * 0.75 ;
+  outputSizeR[ 1 ] = inputSize[ 1 ] * 0.75 ;
+  outputSizeG[ 0 ] = inputSize[ 0 ] * 0.5 ;
+  outputSizeG[ 1 ] = inputSize[ 1 ] * 0.5 ;
+  outputSizeB[ 0 ] = inputSize[ 0 ] * 0.25 ;
+  outputSizeB[ 1 ] = inputSize[ 1 ] * 0.25 ;
   //Output Spacing for each color
 
   //Red outputSpacing
@@ -303,28 +302,28 @@ int main( int argc, char* argv[] )
   TColorImage::SizeType outputSizeREx;
   TColorImage::SizeType outputSizeGEx;
   TColorImage::SizeType outputSizeBEx;
-  outputSizeREx[ 0 ] = outputSizeR[ 0 ] * (4/3) ;
-  outputSizeREx[ 1 ] = outputSizeR[ 1 ] * (4/3) ;
-  outputSizeGEx[ 0 ] = outputSizeR[ 0 ] * (2) ;
-  outputSizeGEx[ 1 ] = outputSizeR[ 1 ] * (2) ;
-  outputSizeBEx[ 0 ] = outputSizeR[ 0 ] * (4) ;
-  outputSizeBEx[ 1 ] = outputSizeR[ 1 ] * (4) ;
   
-  //Output Spacing for each color to expand
+  outputSizeREx[ 0 ] = outputSizeR[ 0 ] * 1.333333333333333333333333333333 ;
+  outputSizeREx[ 1 ] = outputSizeR[ 1 ] * 1.333333333333333333333333333333 ;
+  outputSizeGEx[ 0 ] = outputSizeG[ 0 ] * 2 ;
+  outputSizeGEx[ 1 ] = outputSizeG[ 1 ] * 2 ;
+  outputSizeBEx[ 0 ] = outputSizeB[ 0 ] * (4) ;
+  outputSizeBEx[ 1 ] = outputSizeB[ 1 ] * (4) ;
 
+  //Output Spacing for each color to expand
   //Red outputSpacing
   
-  outputSpacingR[ 0 ] = outputSpacingR[ 0 ]/(4/3);
-  outputSpacingR[ 1 ] = outputSpacingR[ 1 ]/(4/3);
+  outputSpacingR[ 0 ] = outputSpacingR[ 0 ]/1.333333333333333333333333333333;
+  outputSpacingR[ 1 ] = outputSpacingR[ 1 ]/1.333333333333333333333333333333;
 
   //Green outputSpacing
   
-  outputSpacingG[ 0 ] = outputSpacingR[ 0 ]/(2);
-  outputSpacingG[ 1 ] = outputSpacingR[ 1 ]/(2);
+  outputSpacingG[ 0 ] = outputSpacingG[ 0 ]/(2);
+  outputSpacingG[ 1 ] = outputSpacingG[ 1 ]/(2);
   //Blue outputSpacing
   
-  outputSpacingB[ 0 ] = outputSpacingR[ 0 ]/(4);
-  outputSpacingB[ 1 ] = outputSpacingR[ 1 ]/(4);
+  outputSpacingB[ 0 ] = outputSpacingB[ 0 ]/(4);
+  outputSpacingB[ 1 ] = outputSpacingB[ 1 ]/(4);
   
   // Rescale rImg
   ResampleImageFilterType::Pointer resampleFilterREx = ResampleImageFilterType::New( );
@@ -376,7 +375,7 @@ int main( int argc, char* argv[] )
     return( 1 );
 
   } // yrt
-  writer->SetInput( resampleFilterREx->GetOutput() );
+  writer->SetInput( resampleFilterBEx->GetOutput() );
   writer->SetFileName( basename + "_ssB.png" );
   try
   {
@@ -389,34 +388,38 @@ int main( int argc, char* argv[] )
     return( 1 );
 
   } // yrt
-  /*
-  // From color channel images, reconstruct the original color image
-  TColorIterator rgbIt( rgbImg, rgbImg->GetLargestPossibleRegion( ) );
-
+  
+  // From color channel expanded images, reconstruct the original color image
+  
+  
+  TColorIterator rgbIt( img, img->GetLargestPossibleRegion() );
+  TColorIterator cRIt( resampleFilterREx->GetOutput(), resampleFilterREx->GetOutput()->GetLargestPossibleRegion() );
+  TColorIterator cGIt( resampleFilterGEx->GetOutput(), resampleFilterGEx->GetOutput()->GetLargestPossibleRegion() );
+  TColorIterator cBIt( resampleFilterBEx->GetOutput(), resampleFilterBEx->GetOutput()->GetLargestPossibleRegion() );
   rgbIt.GoToBegin( );
-  crIt.GoToBegin( );
-  cgIt.GoToBegin( );
-  cbIt.GoToBegin( );
-  for( ; !rgbIt.IsAtEnd( ) && !crIt.IsAtEnd( ) && !cgIt.IsAtEnd( ) && !cbIt.IsAtEnd( ); ++rgbIt, ++crIt, ++cgIt, ++cbIt )
+  cRIt.GoToBegin( );
+  cGIt.GoToBegin( );
+  cBIt.GoToBegin( );
+  for( ; !rgbIt.IsAtEnd( ) && !cRIt.IsAtEnd( ) && !cGIt.IsAtEnd( ) && !cBIt.IsAtEnd( ); ++rgbIt, ++cRIt, ++cGIt, ++cBIt )
   {
     TRGBPixel value, pixel;
-    value = crIt.Get( );
+    value = cRIt.Get( );
     pixel.SetRed( value.GetRed( ) );
 
-    value = cgIt.Get( );
+    value = cGIt.Get( );
     pixel.SetGreen( value.GetGreen( ) );
 
-    value = cbIt.Get( );
+    value = cBIt.Get( );
     pixel.SetBlue( value.GetBlue( ) );
 
     rgbIt.Set( pixel );
 
   } // rof
-  */
+  
  
- /*
-  writer->SetInput( rgbImg );
-  writer->SetFileName( basename + "_RGB.png" );
+  //Write de rescaled RGB Image
+  writer->SetInput( img );
+  writer->SetFileName( basename + "_rRGB.png" );
   try
   {
     writer->Update( );
@@ -428,7 +431,40 @@ int main( int argc, char* argv[] )
     return( 1 );
 
   } // yrt
-  */
+  
+  //Find diferences
+  //Load Original image
+  TColorImage* imgO = reader->GetOutput( );
+  TColorImage* diferences = reader->GetOutput( );
+  //Compare Original and Rescaled Images
+  TIterator rgbOIt( imgO, imgO->GetLargestPossibleRegion( ) );
+  TColorIterator difIt( diferences, diferences->GetLargestPossibleRegion( ) );
+  rgbIt.GoToBegin( );
+  rgbOIt.GoToBegin( );
+  for( ; !rgbOIt.IsAtEnd( ) && !rgbIt.IsAtEnd( ) && !difIt.IsAtEnd( ) ; ++rgbOIt, ++rgbIt , ++difIt)
+  {
+    TRGBPixel value, pixel;
+    pixel = rgbOIt.Get( )-rgbIt.Get();
+    
+
+    difIt.Set( pixel );
+
+  } // rof
+
+  //Write diferences
+  writer->SetInput( diferences );
+  writer->SetFileName( basename + "_diff.png" );
+  try
+  {
+    writer->Update( );
+
+  }
+  catch( itk::ExceptionObject& err )
+  {
+    std::cerr << "Error: " << err << std::endl;
+    return( 1 );
+
+  } // yrt
   return( 0 );
 }
 

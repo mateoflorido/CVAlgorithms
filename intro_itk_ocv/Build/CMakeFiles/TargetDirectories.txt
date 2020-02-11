@@ -1,7 +1,0 @@
-/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/Build/CMakeFiles/rebuild_cache.dir
-/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/Build/CMakeFiles/pr2_scale_ocv.dir
-/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/Build/CMakeFiles/edit_cache.dir
-/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/Build/CMakeFiles/pr1_color_ocv.dir
-/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/Build/CMakeFiles/03_image_process_itk.dir
-/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/Build/CMakeFiles/pr1_color_itk.dir
-/home/sistemas/Escritorio/Taller 2/intro_itk_ocv/Build/CMakeFiles/pr2_scale_itk.dir
