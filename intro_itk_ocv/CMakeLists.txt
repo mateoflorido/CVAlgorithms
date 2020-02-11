@@ -40,19 +40,10 @@ MARK_AS_ADVANCED(
 ## = Programs to compile =
 ## =======================
 
-ADD_EXECUTABLE( pr1_color_ocv 01_color_channels_ocv.cxx )
-TARGET_LINK_LIBRARIES( pr1_color_ocv ${OpenCV_LIBS} )
 
-ADD_EXECUTABLE( pr2_scale_ocv 02_scale_ocv.cxx )
-TARGET_LINK_LIBRARIES( pr2_scale_ocv ${OpenCV_LIBS} )
-
-ADD_EXECUTABLE( pr1_color_itk 01_color_channels_itk.cxx )
-TARGET_LINK_LIBRARIES( pr1_color_itk ${ITK_LIBRARIES} )
-
-ADD_EXECUTABLE( pr2_scale_itk 02_scale_itk.cxx )
-TARGET_LINK_LIBRARIES( pr2_scale_itk ${ITK_LIBRARIES} )
 
 ADD_EXECUTABLE( 03_image_process_itk 03_image_process_itk.cxx )
 TARGET_LINK_LIBRARIES( 03_image_process_itk ${ITK_LIBRARIES} )
 
-
+ADD_EXECUTABLE( 03_image_process_ocv 03_image_process_ocv.cxx )
+TARGET_LINK_LIBRARIES( 03_image_process_ocv ${OpenCV_LIBS} )
