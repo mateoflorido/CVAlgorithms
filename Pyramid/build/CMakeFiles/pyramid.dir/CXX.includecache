@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mateo/Universidad/Vision/Computer-Vision-Workshops/Pyramid/example.cxx
+stdio.h
+-
+opencv2/opencv.hpp
+-
+
