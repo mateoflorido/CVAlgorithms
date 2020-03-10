@@ -52,7 +52,7 @@ int main(int argc, char** argv )
   Mat m_TestImgSS1 = Mat::zeros( image.size().width / 2 ,image.size().height / 2, CV_8UC3);
   m_BlurRedC = Mat::zeros( image.size( ), CV_8UC3 );
   m_BlurRedSS1 = Mat::zeros( image.size().width / 2 ,image.size().height / 2, CV_8UC3 );
-  std::cout << "Subsample Size: w:" << image.size( ).width / 2 << " h:" << image.size( ).height / 2 << std::endl;
+  //std::cout << "Subsample Size: w:" << image.size( ).width / 2 << " h:" << image.size( ).height / 2 << std::endl;
   // green channel
   Mat gImg = Mat::zeros( image.size( ), CV_8UC3 );
   m_BlurGreenC = Mat::zeros( image.size( ), CV_8UC3 );
@@ -65,7 +65,7 @@ int main(int argc, char** argv )
   Mat rgbImg = Mat::zeros( image.size( ), CV_8UC3 );
    
   // Fill color channel images
-  MatIterator_< Vec3b > it, crIt, cgIt, cbIt, rgbIt, end, endr, endg, endb, endrgb;
+  /*MatIterator_< Vec3b > it, crIt, cgIt, cbIt, rgbIt, end, endr, endg, endb, endrgb;
   it = image.begin< Vec3b >( );
   crIt = rImg.begin< Vec3b >( );
   cgIt = gImg.begin< Vec3b >( );
@@ -88,7 +88,7 @@ int main(int argc, char** argv )
   	(*cbIt)[1] = 0;
   	(*cbIt)[2] = 0;
 
-  } // rof
+  } // rof*/
 
   //Create Gaussian Kernel
   Mat m_GaussianKernel;
@@ -116,37 +116,57 @@ int main(int argc, char** argv )
   //filter2D( bImg, m_BlurBlueC, m_DDepth, m_GaussianKernel, m_Anchor, m_Delta, BORDER_DEFAULT );
   //filter2D( image, m_TestImgBlr, m_DDepth, m_GaussianKernel, m_Anchor, m_Delta, BORDER_DEFAULT );
   GaussianBlur( image, m_TestImgBlr, m_GaussianKernel.size( ), 0.85d );
+  /*
+  MatIterator_< Vec3b > it, crIt, cgIt, cbIt, rgbIt, end, endr, endg, endb, endrgb;
+  it = m_TestImgBlr.begin< Vec3b >( );
+  crIt = m_BlurRedC.begin< Vec3b >( );
+  cgIt = m_BlurGreenC.begin< Vec3b >( );
+  cbIt = m_BlurBlueC.begin< Vec3b >( );
+  end = m_TestImgBlr.end< Vec3b >( );
+  endr = m_BlurRedC.end< Vec3b >( );
+  endg = m_BlurGreenC.end< Vec3b >( );
+  endb = m_BlurBlueC.end< Vec3b >( );
+  int cont =0;
+  for(  ; it != end, crIt != endr, cgIt != endg, cbIt != endb; ++it, ++crIt, ++cgIt, ++cbIt)
+  {
+  	(*crIt)[0] = 0;
+  	(*crIt)[1] = 0;
+  	(*crIt)[2] = (*it)[2];
 
-  //First SubSample
-  for(int i =0; i<511; i++)
-  {
-    for( int j = 0; j < 511; j++)
-     {
-       m_BlurRedSS1.at<float>( i, j ) = m_BlurRedC.at<float>( i*2+1, j*2+1 );
-       m_BlurGreenSS1.at<float>( i, j ) = m_BlurGreenC.at<float>( i*2+1, j*2+1 );
-       m_BlurBlueSS1.at<float>( i, j ) = m_BlurBlueC.at<float>( i*2+1, j*2+1 );
-       m_TestImgSS1.at<float>(i,j) = m_TestImgBlr.at<float>(i*2+1, j*2+1);
-     }
-  }
-  // From color channel images, reconstruct the original color image
-  crIt = rImg.begin< Vec3b >( );
-  cgIt = gImg.begin< Vec3b >( );
-  cbIt = bImg.begin< Vec3b >( );
-  rgbIt = rgbImg.begin< Vec3b >( );
-  endr = rImg.end< Vec3b >( );
-  endg = gImg.end< Vec3b >( );
-  endb = bImg.end< Vec3b >( );
-  endrgb = rgbImg.end< Vec3b >( );
-  for(  ; crIt != endr, cgIt != endg, cbIt != endb, rgbIt != endrgb; ++crIt, ++cgIt, ++cbIt, ++rgbIt)
-  {
-  	(*rgbIt)[0] = (*cbIt)[0];
-  	(*rgbIt)[1] = (*cgIt)[1];
-  	(*rgbIt)[2] = (*crIt)[2];
+  	(*cgIt)[0] = 0;
+  	(*cgIt)[1] = (*it)[1];
+  	(*cgIt)[2] = 0;
   	
+  	(*cbIt)[0] = (*it)[0];
+  	(*cbIt)[1] = 0;
+  	(*cbIt)[2] = 0;
+    cont ++;
+
+  } // rof*/
+  MatIterator_< Vec3b > it, end, it_SS, end_SS;
+  it = m_TestImgBlr.begin< Vec3b >( );
+  end = m_TestImgBlr.end< Vec3b >( );
+  it_SS = m_TestImgSS1.begin< Vec3b >( );
+  end_SS = m_TestImgSS1.end< Vec3b >( );
+  int col =0;
+  int row =0;
+  for(  ; it != end, it_SS != end_SS; ++it)
+  {
+    if(col>1023){
+      row ++;
+      col=0;
+    }
+    if((col%2!=0)&&(row%2!=0)){
+      (*it_SS)[0] = (*it)[0];
+  	  (*it_SS)[1] = (*it)[1];
+  	  (*it_SS)[2] = (*it)[2];
+      it_SS++;
+    }
+    col ++;
   } // rof
+  std::cout<<row<<std::endl;
+  //First SubSample
 
-
-  std::cout << "Value: " << 1.0/16.0;
   
   // Write results
   std::stringstream ss( argv[ 1 ] );
@@ -154,7 +174,7 @@ int main(int argc, char** argv )
   getline( ss, basename, '.' );
 
 
-  imwrite( basename + "_R.png", rImg );
+  /*imwrite( basename + "_R.png", rImg );
   imwrite( basename + "_G.png", gImg );
   imwrite( basename + "_B.png", bImg );
   
@@ -166,7 +186,7 @@ int main(int argc, char** argv )
   imwrite( basename + "_GaussianRSS1.png", m_BlurRedSS1 );
   imwrite( basename + "_GAussianGSS1.png", m_BlurGreenSS1 );
   imwrite( basename + "_GAussianBSS1.png", m_BlurBlueSS1 );
-
+  */
   imwrite( basename + "_GAussianTestSS1.png", m_TestImgSS1 );
   imwrite( basename + "_GAussianTest.png", m_TestImgBlr );
   
