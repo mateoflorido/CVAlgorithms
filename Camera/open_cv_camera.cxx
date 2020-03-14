@@ -26,9 +26,6 @@ int main(int argc, char** argv )
 
   // Read an image
   Mat image;
-  Mat dst_image;
-  Mat warpMat(3,3, CV_64F, cvScalar(0.0));
-
   image = imread( argv[1], 1 );
   if ( !image.data )
   {
@@ -36,6 +33,12 @@ int main(int argc, char** argv )
     return( -1);
   
   } // fi
+
+
+  Mat dst_image;
+  Mat warpMat(3,3, CV_64F, cvScalar(0.0));
+
+  
  
     BoundariesIn[0] = Point2f( -30,-60 );
     BoundariesIn[1] = Point2f( image.cols+50,-50);

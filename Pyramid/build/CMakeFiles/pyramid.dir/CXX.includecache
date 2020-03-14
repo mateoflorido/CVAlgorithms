@@ -6,8 +6,10 @@
 
 #IncludeRegexTransform: 
 
-/home/mateo/Universidad/Vision/Computer-Vision-Workshops/Pyramid/example.cxx
-stdio.h
+/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Pyramid/example.cxx
+iostream
+-
+iterator
 -
 opencv2/opencv.hpp
 -

@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/mateo/Universidad/Vision/Computer-Vision-Workshops/Pyramid/example.cxx" "/home/mateo/Universidad/Vision/Computer-Vision-Workshops/Pyramid/build/CMakeFiles/pyramid.dir/example.cxx.o"
+  "/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Pyramid/example.cxx" "/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Pyramid/build/CMakeFiles/pyramid.dir/example.cxx.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

@@ -1,5 +1,7 @@
-#include <stdio.h>
+#include <iostream>
+#include <iterator>
 #include <opencv2/opencv.hpp>
+//
 #define ONESIXTEEN 0.0625f;
 #define ONEEIGTH 0.125f;
 #define ONEFOURTH 0.25f;
@@ -10,33 +12,86 @@
 
 using namespace cv;
 
-void DownSamplingImage(Mat &m_OriginalImage, Mat &m_SampledImage)
+void DownSamplingImage( Mat &m_OriginalImage, Mat &m_SampledImage )
 {
+  int col = 0;
+  int row = 0;
+  int halt;
+  int m_Size = m_SampledImage.size( ).width;
+  std::cout << "Creating an Image of " << m_Size << " x " << m_Size << std::endl;
   MatIterator_< Vec3b > it, end, it_SS, end_SS;
 
   it = m_OriginalImage.begin< Vec3b >( );
   end = m_OriginalImage.end< Vec3b >( );
   it_SS = m_SampledImage.begin< Vec3b >( );
   end_SS = m_SampledImage.end< Vec3b >( );
-  int col = 0;
-  int row = 0;
 
+  while( it != end && it_SS != end_SS )
+  {
+    if( col > m_Size )
+    {
+      col = 0;
+      row++;
+    }
+    if( row % 2 == 0 )
+    {
+      std::cout << "Skipping row #" << row << " To: "<< m_Size<< std::endl;
+      std::next( it, m_Size );
+      col = 0;
+      row++;
+      continue;
+    }
+    else
+    {
+      it++;
+    }
+    if( col % 2 != 0)
+    {
+      (*it_SS)[ 0 ] = (*it)[ 0 ];
+  	  (*it_SS)[ 1 ] = (*it)[ 1 ];
+  	  (*it_SS)[ 2 ] = (*it)[ 2 ];
+      it_SS++;
+    }
+    col++;
+  }
+/*
   for(  ; it != end, it_SS != end_SS; ++it )
   {
-    if( col > 1023 )
+    if( col >  m_Size )
     {
-      row ++;
       col = 0;
+      row++;
     }
     if( ( col % 2 != 0 ) && ( row % 2 != 0 ) )
     {
-      (*it_SS)[0] = (*it)[0];
-  	  (*it_SS)[1] = (*it)[1];
-  	  (*it_SS)[2] = (*it)[2];
+      (*it_SS)[ 0 ] = (*it)[ 0 ];
+  	  (*it_SS)[ 1 ] = (*it)[ 1 ];
+  	  (*it_SS)[ 2 ] = (*it)[ 2 ];
       it_SS++;
     }
     col ++;
-  } // rof
+  } // rof*/
+}
+
+
+void PyramidDown( Mat &m_OriginalImage, Mat &m_GaussianKernel, std::string basename )
+{
+  int i = 3;
+  Mat m_TreatmentImage = m_OriginalImage;
+  while( i > 0)
+  {
+    std::cout << "Creating " + std::to_string( i ) << " image.\n";
+    Mat m_MiddleImage = Mat::zeros( m_TreatmentImage.size( ).width, m_TreatmentImage.size( ).height, CV_8UC3);
+    GaussianBlur( m_OriginalImage, m_MiddleImage, m_GaussianKernel.size( ), 0.85d );
+    imwrite( basename + "_GaussianBlurNormal" + std::to_string( i ) + ".png", m_MiddleImage );
+    Mat m_DownSampled = Mat::zeros( m_TreatmentImage.size( ).width / 2, m_TreatmentImage.size( ).height / 2, CV_8UC3);
+    DownSamplingImage( m_MiddleImage, m_DownSampled );
+    imwrite( basename + "_GaussianBlur" + std::to_string( i ) + ".png", m_DownSampled );
+    m_TreatmentImage = m_DownSampled;
+    i--;
+
+  }
+  
 }
 
 int main(int argc, char** argv )
@@ -73,6 +128,11 @@ int main(int argc, char** argv )
     return( -1);
   
   } // fi
+
+   // Write results
+  std::stringstream ss( argv[ 1 ] );
+  std::string basename;
+  getline( ss, basename, '.' );
 
   // Create color channel images
   // red channel
@@ -120,6 +180,7 @@ int main(int argc, char** argv )
   //filter2D( image, m_TestImgBlr, m_DDepth, m_GaussianKernel, m_Anchor, m_Delta, BORDER_DEFAULT );
   //First Blur filter !!!!!!!!!!!!!!!!!!!!!!!
   GaussianBlur( image, m_TestImgBlr, m_GaussianKernel.size( ), 0.85d );
+  PyramidDown( image, m_GaussianKernel, basename );
   
   //First Laplacian Matrix UP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //Declare the Laplacian Matrix
@@ -249,10 +310,7 @@ int main(int argc, char** argv )
   } // rof
    
 
-  // Write results
-  std::stringstream ss( argv[ 1 ] );
-  std::string basename;
-  getline( ss, basename, '.' );
+ 
 
   /*imwrite( basename + "_R.png", rImg );
   imwrite( basename + "_G.png", gImg );

@@ -1,0 +1,4 @@
+/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Camera/build/CMakeFiles/rebuild_cache.dir
+/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Camera/build/CMakeFiles/edit_cache.dir
+/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Camera/build/CMakeFiles/cameracv.dir
+/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Camera/build/CMakeFiles/cameracv2.dir

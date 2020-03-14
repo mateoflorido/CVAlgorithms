@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Camera/open_cv_camera.cxx
+stdio.h
+-
+opencv2/opencv.hpp
+-
+
