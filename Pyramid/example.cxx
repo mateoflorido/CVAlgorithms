@@ -10,6 +10,35 @@
 
 using namespace cv;
 
+void DownSamplingImage(Mat &m_OriginalImage, Mat &m_SampledImage)
+{
+  MatIterator_< Vec3b > it, end, it_SS, end_SS;
+
+  it = m_OriginalImage.begin< Vec3b >( );
+  end = m_OriginalImage.end< Vec3b >( );
+  it_SS = m_SampledImage.begin< Vec3b >( );
+  end_SS = m_SampledImage.end< Vec3b >( );
+  int col = 0;
+  int row = 0;
+
+  for(  ; it != end, it_SS != end_SS; ++it )
+  {
+    if( col > 1023 )
+    {
+      row ++;
+      col = 0;
+    }
+    if( ( col % 2 != 0 ) && ( row % 2 != 0 ) )
+    {
+      (*it_SS)[0] = (*it)[0];
+  	  (*it_SS)[1] = (*it)[1];
+  	  (*it_SS)[2] = (*it)[2];
+      it_SS++;
+    }
+    col ++;
+  } // rof
+}
+
 int main(int argc, char** argv )
 {
   // Get command line arguments
@@ -63,32 +92,6 @@ int main(int argc, char** argv )
   m_BlurBlueSS1 = Mat::zeros( image.size().width / 2 ,image.size().height / 2, CV_8UC3 );
   // composite image (RGB)
   Mat rgbImg = Mat::zeros( image.size( ), CV_8UC3 );
-   
-  // Fill color channel images
-  /*MatIterator_< Vec3b > it, crIt, cgIt, cbIt, rgbIt, end, endr, endg, endb, endrgb;
-  it = image.begin< Vec3b >( );
-  crIt = rImg.begin< Vec3b >( );
-  cgIt = gImg.begin< Vec3b >( );
-  cbIt = bImg.begin< Vec3b >( );
-  end = image.end< Vec3b >( );
-  endr = rImg.end< Vec3b >( );
-  endg = gImg.end< Vec3b >( );
-  endb = bImg.end< Vec3b >( );
-  for(  ; it != end, crIt != endr, cgIt != endg, cbIt != endb; ++it, ++crIt, ++cgIt, ++cbIt)
-  {
-  	(*crIt)[0] = 0;
-  	(*crIt)[1] = 0;
-  	(*crIt)[2] = (*it)[2];
-
-  	(*cgIt)[0] = 0;
-  	(*cgIt)[1] = (*it)[1];
-  	(*cgIt)[2] = 0;
-  	
-  	(*cbIt)[0] = (*it)[0];
-  	(*cbIt)[1] = 0;
-  	(*cbIt)[2] = 0;
-
-  } // rof*/
 
   //Create Gaussian Kernel
   Mat m_GaussianKernel;
@@ -109,13 +112,35 @@ int main(int argc, char** argv )
   m_GaussianKernel.at<float>(2,2) = ONESIXTEEN;
   
 
-  //First Blur filter
+  
 
   //filter2D( rImg, m_BlurRedC, m_DDepth, m_GaussianKernel, m_Anchor, m_Delta, BORDER_DEFAULT );
   //filter2D( gImg, m_BlurGreenC, m_DDepth, m_GaussianKernel, m_Anchor, m_Delta, BORDER_DEFAULT );
   //filter2D( bImg, m_BlurBlueC, m_DDepth, m_GaussianKernel, m_Anchor, m_Delta, BORDER_DEFAULT );
   //filter2D( image, m_TestImgBlr, m_DDepth, m_GaussianKernel, m_Anchor, m_Delta, BORDER_DEFAULT );
+  //First Blur filter !!!!!!!!!!!!!!!!!!!!!!!
   GaussianBlur( image, m_TestImgBlr, m_GaussianKernel.size( ), 0.85d );
+  
+  //First Laplacian Matrix UP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //Declare the Laplacian Matrix
+  Mat m_Laplaciana1;
+  m_Laplaciana1= Mat::zeros( image.size( ), CV_8UC3);
+  //Declare the iterators for the blurred matrix, the laplacian matrix and the original
+  MatIterator_< Vec3b > it_BL, end_BL, it_LP, end_LP, it, end ;
+  //Initialize iterators 
+  it_BL = m_TestImgBlr.begin < Vec3b >();
+  end_BL = m_TestImgBlr.end < Vec3b >();
+  it_LP = m_Laplaciana1.begin < Vec3b >();
+  end_LP = m_Laplaciana1.end < Vec3b >();
+  it = image.begin < Vec3b >();
+  end = image.end < Vec3b >();
+  //Laplacian Matrix = Original Matrix - Blurred Matrix 
+  for( ;it!= end, it_BL!= end_BL, it_LP!= end_LP; it++, it_BL++, it_LP++){
+    (*it_LP)[0]=(*it)[0]-(*it_BL)[0];
+    (*it_LP)[1]=(*it)[1]-(*it_BL)[1];
+    (*it_LP)[2]=(*it)[2]-(*it_BL)[2];
+  } // rof
+
   /*
   MatIterator_< Vec3b > it, crIt, cgIt, cbIt, rgbIt, end, endr, endg, endb, endrgb;
   it = m_TestImgBlr.begin< Vec3b >( );
@@ -142,8 +167,10 @@ int main(int argc, char** argv )
   	(*cbIt)[2] = 0;
     cont ++;
 
+  
   } // rof*/
-  MatIterator_< Vec3b > it, end, it_SS, end_SS;
+  //First SubSample UP!!!!!!!!!!!!!!!
+  MatIterator_< Vec3b > it_SS, end_SS;
   it = m_TestImgBlr.begin< Vec3b >( );
   end = m_TestImgBlr.end< Vec3b >( );
   it_SS = m_TestImgSS1.begin< Vec3b >( );
@@ -164,15 +191,68 @@ int main(int argc, char** argv )
     }
     col ++;
   } // rof
-  std::cout<<row<<std::endl;
-  //First SubSample
+  // First Sampling Down (más grande)!!!!!!!!!!!!!!!!!!!!!!!
+  //Declare Sampling Down Matrix (2048x2048)
+  Mat m_TestImgDS1 = Mat::zeros( image.size().width * 2 ,image.size().height * 2, CV_8UC3);
+  //Declare UpSampe Iterators
+  MatIterator_< Vec3b > it_DS, end_DS;
+  it=image.begin < Vec3b >();
+  end=image.end < Vec3b >();
+  it_DS=m_TestImgDS1.begin < Vec3b >();
+  end_DS=m_TestImgDS1.end < Vec3b >();
+  //Fill the even rows and cols with 0
+  col=0;
+  row=0;
+  for(  ; it != end, it_DS != end_DS; ++it_DS){
+      if(col>2047){
+        row++;
+        col=0;
+      } 
+      if((col%2!=0)&&(row%2!=0)){
+        (*it_DS)[0]=(*it)[0];
+        (*it_DS)[1]=(*it)[1];
+        (*it_DS)[2]=(*it)[2];
+        it++;
+      }else{
+        (*it_DS)[0]=0;
+        (*it_DS)[1]=0;
+        (*it_DS)[2]=0;
+      }
+      col++;
+  } //rof
 
-  
+
+  //GaussianBlur Down 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //Declare GaussianBlur Down Matrix (2048x2048)
+  Mat m_TestImgDBl1;
+  m_TestImgDBl1= Mat::zeros( m_TestImgDS1.size( ), CV_8UC3);
+  //Call convolution function
+  GaussianBlur( m_TestImgDS1, m_TestImgDBl1, m_GaussianKernel.size( ), 0.85d );
+
+  //Laplacian Down 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //Declare first Down Laplacian Matrix (2048x2048)
+  Mat m_DLaplacian1;
+  m_DLaplacian1 = Mat::zeros( m_TestImgDS1.size( ), CV_8UC3);
+  //Declare iterators
+  MatIterator_< Vec3b > it_DLP, end_DLP, it_DBL, end_DBL;
+  it_DS = m_TestImgDS1.begin< Vec3b >();
+  end_DS = m_TestImgDS1.end< Vec3b >();
+  it_DLP = m_DLaplacian1.begin< Vec3b >();
+  end_DLP = m_DLaplacian1.end< Vec3b >();
+  it_DBL = m_TestImgDBl1.begin< Vec3b >();
+  end_DBL = m_TestImgDBl1.end< Vec3b >();
+  //Down Laplacian Matrix = First Down Sampled Matrix - GaussianBlur Down Matrix 
+  for( ;it_DS!= end_DS, it_DBL!= end_DBL, it_DLP!= end_DLP; it_DS++, it_DBL++, it_DLP++){
+    (*it_DLP)[0]=(*it_DS)[0]-(*it_DBL)[0];
+    (*it_DLP)[1]=(*it_DS)[1]-(*it_DBL)[1];
+    (*it_DLP)[2]=(*it_DS)[2]-(*it_DBL)[2];
+  } // rof
+   
+
   // Write results
   std::stringstream ss( argv[ 1 ] );
   std::string basename;
   getline( ss, basename, '.' );
-
 
   /*imwrite( basename + "_R.png", rImg );
   imwrite( basename + "_G.png", gImg );
@@ -187,11 +267,13 @@ int main(int argc, char** argv )
   imwrite( basename + "_GAussianGSS1.png", m_BlurGreenSS1 );
   imwrite( basename + "_GAussianBSS1.png", m_BlurBlueSS1 );
   */
-  imwrite( basename + "_GAussianTestSS1.png", m_TestImgSS1 );
-  imwrite( basename + "_GAussianTest.png", m_TestImgBlr );
-  
-  
 
+  imwrite( basename + "_GAussianSS1.png", m_TestImgSS1 ); //Up Sample 1
+  imwrite( basename + "_GAussian1.png", m_TestImgBlr ); //Up Blur 1
+  imwrite( basename + "_Laplacian1.png", m_Laplaciana1); //UpLaplacian 1
+  imwrite( basename + "_OrigninalDS1.png", m_TestImgDS1); //DownSample 1
+  imwrite( basename + "_GaussianD1.png", m_TestImgDBl1); // Blur DownSample 1
+  imwrite( basename + "_DLaplacian1.png", m_DLaplacian1); // DownLaplacian 1
   return( 0 );
 }
 
