@@ -1,3 +1,0 @@
-/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Pyramid/build/CMakeFiles/rebuild_cache.dir
-/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Pyramid/build/CMakeFiles/pyramid.dir
-/home/mateo/Universidad/VisionArtificial/Computer-Vision-Workshops/Pyramid/build/CMakeFiles/edit_cache.dir
