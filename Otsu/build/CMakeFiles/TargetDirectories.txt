@@ -1,3 +1,0 @@
-/home/mateo/Universidad/Vision/Computer-Vision-Workshops/Otsu/build/CMakeFiles/rebuild_cache.dir
-/home/mateo/Universidad/Vision/Computer-Vision-Workshops/Otsu/build/CMakeFiles/example.dir
-/home/mateo/Universidad/Vision/Computer-Vision-Workshops/Otsu/build/CMakeFiles/edit_cache.dir

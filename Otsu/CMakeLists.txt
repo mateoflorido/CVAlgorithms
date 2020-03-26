@@ -36,5 +36,5 @@ MARK_AS_ADVANCED(
 ## = Programs to compile =
 ## =======================
 
-ADD_EXECUTABLE( example example.cxx )
-TARGET_LINK_LIBRARIES( example ${OpenCV_LIBS} )
+ADD_EXECUTABLE( otsu otsu.cxx )
+TARGET_LINK_LIBRARIES( otsu ${OpenCV_LIBS} )
