@@ -30,6 +30,11 @@ int main(int argc, char** argv )
   
   } // fi
   
+  //Save basename 
+  std::stringstream ss( argv[ 1 ] );
+  std::string basename;
+  getline( ss, basename ,'.' );
+
   //Write something
   imwrite( basename + "_example.png", image);
   return( 0 );
