@@ -54,7 +54,6 @@ int main(int argc, char** argv )
   cvtColor( src, src_gray, COLOR_BGR2GRAY );
   //Use Otsu's Method to find Threshold
   int thresh = threshold(src_gray, dst,0,255,CV_THRESH_OTSU)*0.4;
-  std::cout<<thresh<<std::endl;
   CannyThreshold(thresh, src_gray, detected_edges, 3,3, dst, src);
 
   //Back Projection Method Code
@@ -85,21 +84,28 @@ int main(int argc, char** argv )
 
   int channels[] = { 0, 1 };
 
-  /// Get the Histogram and normalize it
+  // Get the Histogram and normalize it
   calcHist( &hsv, 1, channels, mask, hist, 2, histSize, ranges, true, false );
   //calcHist( &hsv, 1, 0, Mat(), hist, 1, &histSize, &ranges, true, false );
   normalize( hist, hist, 0, 255, NORM_MINMAX, -1, Mat() );
 
-  /// Get Backprojection
+  // Get Backprojection
   Mat backproj;
   calcBackProject( &hsv, 1, channels, hist, backproj, ranges, 1, true );
+
+  //Dilate for making canny borders more relevant
+  //Default kernel size (3x3)
+  dilate(dst, dst, Mat(), Point(-1, -1), 2, 1, 1);
   
+  //Transform backproj Gray Scale image to BGR to add color borders from Canny
+  cvtColor(backproj, backproj, CV_GRAY2BGR);
+
   //Add Canny and Back Projection Segmentations
   Mat suma; 
-  add(backproj,detected_edges, suma);
+  add(backproj,dst, suma);
   
   //Write Canny's segementation, Back Projection segmentation and added segmentation
-  imwrite( basename + "_cannySeg.png", detected_edges);
+  imwrite( basename + "_cannySeg.png", dst);
   imwrite( basename + "_backProjSeg.png", backproj);
   imwrite( basename + "_finalSeg.png", suma);
   return( 0 );
