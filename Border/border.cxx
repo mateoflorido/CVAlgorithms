@@ -3,6 +3,17 @@
 
 using namespace cv;
 
+const int ratio = 3;
+const int kernel_size = 3;
+
+void CannyThreshold(int Thresh, Mat& src_gray, Mat& detected_edges, int ratio, int kernel_size, Mat& dst, Mat& src)
+{
+    blur( src_gray, detected_edges, Size(3,3) );
+    Canny( detected_edges, detected_edges, Thresh, Thresh*ratio, kernel_size );
+    dst = Scalar::all(0);
+    src.copyTo( dst, detected_edges);
+}
+
 int main(int argc, char** argv )
 {
   // Get command line arguments
@@ -29,12 +40,17 @@ int main(int argc, char** argv )
     return( -1);
   
   } // fi
-
-  //Transform to cvt
+    //Canny Code
+  Mat src, src_gray;
+  Mat dst, detected_edges;
+  src=image.clone();
+  dst.create( image.size(), image.type() );
+  cvtColor( src, src_gray, COLOR_BGR2GRAY );
+  CannyThreshold(threshold(src_gray, dst,0,255,CV_THRESH_OTSU), src_gray, detected_edges, 3,3, dst, src);
+  //Transform to hsvMat src, src_gray;
   Mat hsv;
   cvtColor( image, hsv, COLOR_BGR2HSV );
-
-  Point seed = Point( 0, 0 );
+   Point seed = Point( 0, 0 );
 
     int newMaskVal = 255;
     Scalar newVal = Scalar( 120, 120, 120 );
@@ -46,9 +62,7 @@ int main(int argc, char** argv )
     floodFill( image, mask2, seed, newVal, 0, Scalar( 20, 20, 20 ), Scalar( 20, 20, 20), flags );
     Mat mask = mask2( Range( 1, mask2.rows - 1 ), Range( 1, mask2.cols - 1 ) );
 
-    imshow( "Mask", mask );
-
-
+ 
   Mat hist;
   int h_bins = 30; int s_bins = 32;
   int histSize[] = { h_bins, s_bins };
@@ -68,16 +82,16 @@ int main(int argc, char** argv )
   Mat backproj;
   calcBackProject( &hsv, 1, channels, hist, backproj, ranges, 1, true );
 
-  /// Draw the backproj
-  imshow( "BackProj", backproj );
-
   //Save basename 
   std::stringstream ss( argv[ 1 ] );
   std::string basename;
   getline( ss, basename ,'.' );
+
+  Mat suma; 
+  add(backproj,detected_edges, suma);
   
   //Write something
-  imwrite( basename + "_example.png", backproj);
+  imwrite( basename + "_example.png", suma);
   return( 0 );
 }
 
