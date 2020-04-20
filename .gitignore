@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+#VsCode Trash
+.vscode
+*.json
