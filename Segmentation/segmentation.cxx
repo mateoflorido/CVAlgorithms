@@ -131,15 +131,16 @@ int main( int argc, char* argv[] )
 
   // ----- Connectivity Region Growing -----
   ImageType::IndexType seed;
-  seed[ 0 ] = 120;
-  seed[ 1 ] = 290;
+  seed[ 0 ] = 430;
+  seed[ 1 ] = 666;
 
   ConfidenceConnectedFilterType::Pointer confidenceFilter = ConfidenceConnectedFilterType::New();
   confidenceFilter->SetInitialNeighborhoodRadius(3);
   confidenceFilter->SetMultiplier(3);
-  confidenceFilter->SetNumberOfIterations(25);
+  confidenceFilter->SetNumberOfIterations(50);
   confidenceFilter->SetReplaceValue(255);
   confidenceFilter->SetSeed(seed);
+  reader->Update();
   confidenceFilter->SetInput(reader->GetOutput());
   confidenceFilter->Update();
 
