@@ -141,7 +141,6 @@ std::vector<Point> Grow(Mat &image_gray, Point &seed, float Thresh, char criteri
     active_front.push(seed);
     image_gray.at<int>(seed.y, seed.x);
     //Growing algorithm
-    std::cout << "Grow -> Antes del while" << std::endl;
     while (!active_front.empty()) {
         aux = active_front.front();
         if (verified[aux.y][aux.x]) {
@@ -185,25 +184,36 @@ std::vector<Point> Grow(Mat &image_gray, Point &seed, float Thresh, char criteri
         verified[aux.y][aux.x] = true;
         active_front.pop();
     }
-    std::cout << "Grow -> Después del while" << std::endl;
     return region;
 
 }
 
 int main(int argc, char **argv) {
     // Get command line arguments
-    if (argc < 7) {
-        std::cerr << "Usage: " << argv[0] << " image_file " << " x_seed_coordinates/-1 (-1 for automatic seed) "
-                  << " y_seed_coordinates/-1 (-1 for automatic seed) " << " umbral "
-                  << "p/v/c (p for average, v for variance or c for contrast) " << " 4/8 (number of neighbors)" << std::endl;
+     bool isAutoS = false;
+    if (argc < 6) {
+        std::cerr << "Usage: " << argv[0] << " image_file [x y] | autoseed [thresh] [similarity criterion](a|c|v) [number of neighbors](4|8) "<< std::endl;
         return (-1);
-    } // fi
+    } else if(argc == 6){
+        if(strcmp(argv[2],"autoseed")!=0){
+            std::cerr << "Usage: " << argv[0] << " image_file [x y] | autoseed [thresh] [similarity criterion](a|c|v) [number of neighbors](4|8) "<< std::endl;
+            return (-1);
+        } else{
+            isAutoS = true;
+        }
+    } else if(argc == 7){
+        if(strcmp(argv[2],"autoseed")==0 || strcmp(argv[3],"autoseed")==0){
+            std::cerr << "Usage: " << argv[0] << " image_file [x y] | autoseed [thresh] [similarity criterion](a|c|v) [number of neighbors](4|8) "<< std::endl;
+            return (-1);
+        }
+    }
 
     // Review given command line arguments
-    std::cout << "-------------------------" << std::endl;
+    std::cout << "-----------------------------------------------------" << std::endl;
+    std::cout << "Given command line arguments..." << std::endl;
     for (int a = 0; a < argc; a++)
         std::cout << argv[a] << std::endl;
-    std::cout << "-------------------------" << std::endl;
+    std::cout << "-----------------------------------------------------" << std::endl;
 
     // Read an image
     Mat image;
@@ -225,35 +235,54 @@ int main(int argc, char **argv) {
 
     //Setting seed point
     Point seed;
-    seed = Point(std::atoi(argv[2]), std::atoi(argv[3]));
-    if (seed.x == -1 || seed.y == -1) {
-        if (seed.y > 0 || seed.x > 0) {
-            std::cerr << "Invalid seed, for automatic seed both need to be -1 ..." << std::endl;
-        }
+    if (isAutoS){
+        seed = Point(-1, -1);
+    }else{
+        seed = Point(std::atoi(argv[2]), std::atoi(argv[3]));
+    }
+    if (seed.x == -1 && seed.y == -1) {
         std::cout << "Automatic seed enabled..." << std::endl;
         seed = seedGenerator(image_gray);
     } else {
         if (seed.x > image.size().width - 1 || seed.x > image.size().height - 1) {
             std::cerr << "Seed point is outside image limits ..." << std::endl;
+            return (-1);
         }
     }
 
-    //Select criterion to compare
-    char criterion = *argv[5];
-    if(criterion != 'a' && criterion != 'c' && criterion != 'v'){
-        std::cerr << "Sixth argument must be c for contrast, a for average or v for variance... "<< std::endl;
+    char criterion; 
+    int nNeighbors=0;
+    if(isAutoS==false){
+        //Select criterion to compare
+        criterion = *argv[5];
+        if(criterion != 'a' && criterion != 'c' && criterion != 'v'){
+            std::cerr << "Sixth argument must be c for contrast, a for average or v for variance... "<< std::endl;
+            return (-1);
+        }
+        //Saving number of neighbors
+        nNeighbors = std::atoi(argv[6]);
+        if(nNeighbors != 4 && nNeighbors != 8){
+            std::cerr<< "Number of neighbors must be 4 or 8"<<std::endl;
+            return (-1);
+        }
+    }else {
+        //Select criterion to compare
+        criterion = *argv[4];
+        if(criterion != 'a' && criterion != 'c' && criterion != 'v'){
+            std::cerr << "Fifth argument must be c for contrast, a for average or v for variance... "<< std::endl;
+            return (-1);
+        }
+        //Saving number of neighbors
+        nNeighbors = std::atoi(argv[5]);
+        if(nNeighbors != 4 && nNeighbors != 8){
+            std::cerr<< "Number of neighbors must be 4 or 8"<<std::endl;
+            return (-1);
+        }
     }
-
-    //Saving number of neighbors
-    int nNeighbors = std::atoi(argv[6]);
-    if(nNeighbors != 4 && nNeighbors != 8){
-        std::cerr<< "Number of neighbors must be 4 or 8"<<std::endl;
-    }
+    
 
     //Growing
-    std::cout << "Va a entrar" << std::endl;
     vector<Point> region = Grow(image_gray, seed, umbral, criterion, nNeighbors);
-    std::cout << "Va a salir" << std::endl;
 
     //Fill object
     Mat etiquetada = Mat::zeros(image.size(), CV_8UC3);
@@ -261,11 +290,15 @@ int main(int argc, char **argv) {
     cvtColor(etiquetada, etiquetada, COLOR_RGB2GRAY);
     cvtColor(segmentada, segmentada, COLOR_RGB2GRAY);
 
-
-    std::cout << region.size() << std::endl;
     for (int i = 0; i < region.size(); i++) {
         if (region[i].x == 10 && region[i].y == 10) {
-            std::cout << "Si el resultado es extraño, se recomienda elegir un umbral menor..." << std::endl;
+            if(isAutoS){
+                std::cout << "If the result seems strange, try your own seed ..." << std::endl;
+            }
+            else{
+                std::cout << "If the result seems strange, it is recommended to choose a lower threshold or a different similarity criterion...." << std::endl;
+            }
+            
         }
         etiquetada.at<uchar>(region[i].y, region[i].x) = 255;
         segmentada.at<uchar>(region[i].y, region[i].x) = image_gray.at<uchar>(region[i].y, region[i].x);
