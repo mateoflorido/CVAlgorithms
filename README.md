@@ -1,5 +1,3 @@
-# Computer-Vision-Workshops
-[VA] 2020-1 Talleres
 # Computer Vision Algorithms
 In this repository you can find different famous algorithms used in computer vision. All are written in C++ and OpenCV.
 
